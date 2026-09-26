@@ -1,18 +1,5 @@
 [
   {
-    "id": "cf11f9bfa",
-    "name": "test",
-    "email": "",
-    "address": "",
-    "company": "",
-    "notes": "",
-    "birthday": "",
-    "group": "Mới",
-    "phone": "121548451",
-    "createdAt": "2026-09-26T02:56:04.691Z",
-    "updatedAt": "2026-09-26T02:56:04.691Z"
-  },
-  {
     "id": "c001",
     "name": "Nguyễn Văn An",
     "phone": "0901234567",
@@ -35,18 +22,6 @@
     "birthday": "1990-07-21",
     "notes": "",
     "createdAt": "2026-01-12T09:30:00.000Z"
-  },
-  {
-    "id": "c003",
-    "name": "Lê Hoàng Cường",
-    "phone": "0987654321",
-    "email": "cuong.le@example.com",
-    "address": "88 Trần Duy Hưng, Cầu Giấy, Hà Nội",
-    "company": "Cường Logistics",
-    "group": "VIP",
-    "birthday": "1982-11-02",
-    "notes": "Khách hàng doanh nghiệp, hợp đồng năm",
-    "createdAt": "2026-02-01T02:15:00.000Z"
   },
   {
     "id": "c004",

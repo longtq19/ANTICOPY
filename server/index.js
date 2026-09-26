@@ -27,6 +27,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DEV = process.argv.includes('--dev');
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
+const SENSITIVE_DIRS = ['data', 'server', 'scripts', '.git'];
 const PHONE_TTL_MS = 8000;
 const SECURITY_LOCK_MS = 60 * 1000;
 const LOCKING_EVENTS = new Set(['devtools', 'tamper', 'canvas-read']);
@@ -37,6 +38,40 @@ function lanAddresses() {
     .flat()
     .filter((n) => n && (n.family === 'IPv4' || n.family === 4) && !n.internal)
     .map((n) => n.address);
+}
+
+function isInsideDir(dir, file) {
+  const rel = path.relative(path.resolve(dir), path.resolve(file));
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
+/** Reject direct downloads of data files, server source, scripts, and git history. */
+function isBlockedAssetUrl(rawUrl) {
+  const pathname = String(rawUrl ?? '/').split('?')[0].split('#')[0];
+  if (pathname.includes('\0')) return true;
+  let decoded = pathname;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      return true;
+    }
+  }
+  if (decoded.includes('\0')) return true;
+  const slash = decoded.replace(/\\/g, '/');
+  if (slash.toLowerCase().startsWith('/@fs/')) {
+    const fsPath = slash.slice(5).replace(/^\/+/, '');
+    return SENSITIVE_DIRS.some((dir) => isInsideDir(path.join(ROOT, dir), fsPath));
+  }
+  const segments = [];
+  for (const seg of slash.split('/')) {
+    if (!seg || seg === '.') continue;
+    if (seg === '..') segments.pop();
+    else segments.push(seg);
+  }
+  return SENSITIVE_DIRS.includes((segments[0] ?? '').toLowerCase());
 }
 
 const app = express();
@@ -58,6 +93,11 @@ app.use((req, res, next) => {
     );
   }
   next();
+});
+
+app.use((req, res, next) => {
+  if (!isBlockedAssetUrl(req.originalUrl)) return next();
+  return res.status(403).json({ error: 'Không được phép' });
 });
 
 const api = express.Router();
@@ -179,7 +219,7 @@ if (DEV) {
   const vite = await createServer({
     root: ROOT,
     appType: 'spa',
-    server: { middlewareMode: true, hmr: { server: httpServer } },
+    server: { middlewareMode: true, ws: { server: httpServer } },
   });
   app.use(vite.middlewares);
 } else {
