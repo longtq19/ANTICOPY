@@ -1,0 +1,14 @@
+[
+  {
+    "username": "admin",
+    "displayName": "Quản trị viên",
+    "role": "admin",
+    "passwordHash": "561e682ce5b7aaa92aca316dda2a4fa0:b2ba78378b5f27e7fc75ab8603aec455a1b807262220c3ff9b5670c8f5af1757"
+  },
+  {
+    "username": "nhanvien",
+    "displayName": "Nhân viên kinh doanh",
+    "role": "viewer",
+    "passwordHash": "d3be79251363e33daddfbda418c61749:1c0473fda6378d6da6d1e196ff2b3f097ecf8afdecb7bf16622c30a8d354c6e7"
+  }
+]

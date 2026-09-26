@@ -1,0 +1,25 @@
+{
+  "name": "lan-customer-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quản lý & hiển thị danh sách khách hàng trong mạng LAN, bảo vệ số điện thoại nhiều lớp",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch-path=server server/index.js --dev",
+    "build": "vite build",
+    "start": "npm run build && node server/index.js",
+    "serve": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.1"
+  }
+}
