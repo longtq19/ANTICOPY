@@ -9,7 +9,11 @@ import {
   clientIp,
   createSession,
   destroySession,
+  formatPhoneLockMessage,
+  isPhoneSwitchViolation,
   lockPhoneReveal,
+  notePhoneReveal,
+  PHONE_SWITCH_LOCK_MS,
   phoneRevealLockRemaining,
   publicSession,
   rateLimit,
@@ -130,10 +134,22 @@ api.post(
   (req, res) => {
     const locked = phoneRevealLockRemaining(req.auth);
     if (locked) {
-      return res.status(423).json({ error: `Tạm khóa xem số ${Math.ceil(locked / 1000)}s do vi phạm bảo mật` });
+      return res.status(423).json({ error: formatPhoneLockMessage(locked, req.auth.lockReason) });
     }
     const customer = store.getCustomer(req.params.id);
     if (!customer) return res.status(404).json({ error: 'Không tìm thấy khách hàng' });
+    if (isPhoneSwitchViolation(req.auth, customer.id)) {
+      lockPhoneReveal(req.auth, PHONE_SWITCH_LOCK_MS, 'switch');
+      store.audit({
+        type: 'phone-switch-lock',
+        username: req.auth.username,
+        ip: req.auth.ip,
+        customerId: customer.id,
+        recentCustomerIds: [...new Set((req.auth.phoneReveals ?? []).map((r) => r.customerId))],
+      });
+      return res.status(423).json({ error: formatPhoneLockMessage(PHONE_SWITCH_LOCK_MS, 'switch') });
+    }
+    notePhoneReveal(req.auth, customer.id);
     store.audit({ type: 'phone-reveal', username: req.auth.username, ip: req.auth.ip, customerId: customer.id });
     res.json({ ...renderPhoneGlyph(customer.phone), ttl: PHONE_TTL_MS });
   },

@@ -71,7 +71,10 @@ export default function PhoneCanvas({ customerId }) {
       h.active = false;
       setError(err.message);
       setState('error');
-      h.timer = setTimeout(() => setState('idle'), 3000);
+      if (err.status === 423) {
+        window.dispatchEvent(new CustomEvent('anticopy-phone-lock', { detail: err.message }));
+      }
+      h.timer = setTimeout(() => setState('idle'), err.status === 423 ? 8000 : 3000);
     }
   };
 

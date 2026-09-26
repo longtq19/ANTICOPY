@@ -247,6 +247,17 @@ textarea:focus {
   margin-bottom: 12px;
 }
 
+.lock-banner {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 10px 12px;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
 .table-card {
   overflow: hidden;
 }
@@ -370,10 +381,18 @@ textarea:focus {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.phone[data-state='error'] .phone-view {
+  height: auto;
+  min-height: 38px;
+}
 .phone[data-state='error'] .phone-mask {
+  position: relative;
   color: var(--danger);
   letter-spacing: 0;
   font-size: 0.78rem;
+  white-space: normal;
+  line-height: 1.3;
+  padding: 6px 10px;
 }
 .phone-btn {
   border: 1px solid #c7d2fe;

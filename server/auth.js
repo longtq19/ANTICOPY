@@ -13,7 +13,7 @@ export function publicSession(s) {
 
 export function createSession(user, ip) {
   const token = crypto.randomBytes(32).toString('base64url');
-  const session = { ...user, ip, createdAt: Date.now(), lockUntil: 0 };
+  const session = { ...user, ip, createdAt: Date.now(), lockUntil: 0, lockReason: null, phoneReveals: [] };
   sessions.set(token, session);
   return { token, session };
 }
@@ -54,12 +54,49 @@ export function requireProtectedClient(req, res, next) {
   next();
 }
 
-export function lockPhoneReveal(session, ms) {
-  session.lockUntil = Math.max(session.lockUntil, Date.now() + ms);
+export const PHONE_SWITCH_WINDOW_MS = 5 * 60 * 1000;
+export const PHONE_SWITCH_LOCK_MS = 5 * 60 * 1000;
+
+export function lockPhoneReveal(session, ms, reason = 'security') {
+  const until = Date.now() + ms;
+  if (until >= (session.lockUntil || 0)) {
+    session.lockUntil = until;
+    session.lockReason = reason;
+  }
 }
 
 export function phoneRevealLockRemaining(session) {
-  return Math.max(0, session.lockUntil - Date.now());
+  return Math.max(0, (session.lockUntil || 0) - Date.now());
+}
+
+export function formatPhoneLockMessage(remainingMs, reason) {
+  const sec = Math.max(1, Math.ceil(remainingMs / 1000));
+  const time =
+    sec >= 60
+      ? `${Math.floor(sec / 60)} phút${sec % 60 ? ` ${sec % 60} giây` : ''}`
+      : `${sec} giây`;
+  const why =
+    reason === 'switch'
+      ? 'do xem 2 số điện thoại khác nhau trong 5 phút'
+      : 'do vi phạm bảo mật';
+  return `Tạm khóa xem số ${time} ${why}.`;
+}
+
+function recentPhoneReveals(session) {
+  const now = Date.now();
+  if (!session.phoneReveals?.length && session.lastPhoneReveal) {
+    session.phoneReveals = [session.lastPhoneReveal];
+  }
+  session.phoneReveals = (session.phoneReveals ?? []).filter((r) => now - r.at < PHONE_SWITCH_WINDOW_MS);
+  return session.phoneReveals;
+}
+
+export function isPhoneSwitchViolation(session, customerId) {
+  return recentPhoneReveals(session).some((r) => r.customerId !== customerId);
+}
+
+export function notePhoneReveal(session, customerId) {
+  recentPhoneReveals(session).push({ customerId, at: Date.now() });
 }
 
 const buckets = new Map();

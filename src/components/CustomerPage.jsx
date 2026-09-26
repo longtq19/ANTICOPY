@@ -26,6 +26,7 @@ export default function CustomerPage({ user, onLogout }) {
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(null);
   const [lanUrls, setLanUrls] = useState([]);
+  const [phoneLock, setPhoneLock] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -46,6 +47,12 @@ export default function CustomerPage({ user, onLogout }) {
 
   useEffect(() => {
     api.serverInfo().then((info) => setLanUrls(info.urls)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const onLock = (e) => setPhoneLock(String(e.detail ?? ''));
+    window.addEventListener('anticopy-phone-lock', onLock);
+    return () => window.removeEventListener('anticopy-phone-lock', onLock);
   }, []);
 
   const remove = async (c) => {
@@ -80,6 +87,11 @@ export default function CustomerPage({ user, onLogout }) {
       </header>
 
       <GuardBanner />
+      {phoneLock && (
+        <div className="lock-banner" role="alert">
+          {phoneLock}
+        </div>
+      )}
 
       <section className="toolbar">
         <input

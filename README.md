@@ -89,6 +89,7 @@ src/                  React (Vite)
 - **Rate limit** 20 lượt xem/phút/tài khoản; 10 lần đăng nhập/phút/IP.
 - **Phiên gắn với IP** đăng nhập; token hết hạn sau 8 giờ, lưu `sessionStorage` (đóng tab là mất).
 - **Chặn client lạ**: yêu cầu header `X-Anticopy-Client` và `Sec-Fetch-Site: same-origin` (khi trình duyệt gửi).
+- **Khóa 5 phút** quyền xem mọi số nếu xem 2 số điện thoại khác nhau trong vòng 5 phút (không cần liền nhau).
 - **Khóa 60 giây** quyền xem số khi client báo DevTools, can thiệp watermark hoặc đọc canvas.
 - **Nhật ký audit** (`data/audit.log`): ai xem số của khách nào, lúc nào, từ IP nào; mọi vi phạm.
 - Header bảo mật: CSP chặt (production), `X-Frame-Options: DENY`, `nosniff`, `no-referrer`.
